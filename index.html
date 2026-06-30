@@ -626,6 +626,35 @@
       font-weight: 600;
     }
 
+    .sortable-th {
+      cursor: pointer;
+    }
+
+    .sort-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      text-align: left;
+    }
+
+    .sort-btn:hover {
+      color: var(--cds-link-primary);
+    }
+
+    .sort-indicator {
+      color: var(--cds-text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
     .type-pill {
       display: inline-flex;
       align-items: center;
@@ -1006,6 +1035,7 @@
       fundAssetTotal: 0
     };
     let activeType = "stock";
+    let tableSort = { key: "date", direction: "desc" };
 
     const $ = (id) => document.getElementById(id);
 
@@ -1269,16 +1299,82 @@
       render();
     }
 
+    function toggleSort(key) {
+      if (tableSort.key === key) {
+        tableSort.direction = tableSort.direction === "asc" ? "desc" : "asc";
+      } else {
+        tableSort.key = key;
+        tableSort.direction = ["date", "updatedAt"].includes(key) ? "desc" : "asc";
+      }
+      renderTable();
+    }
+
+    function sortRecords(items) {
+      const direction = tableSort.direction === "asc" ? 1 : -1;
+
+      return [...items].sort((a, b) => {
+        let valueA;
+        let valueB;
+
+        switch (tableSort.key) {
+          case "type":
+            valueA = a.type === "stock" ? 0 : 1;
+            valueB = b.type === "stock" ? 0 : 1;
+            break;
+          case "name":
+            valueA = (a.name || "").localeCompare(b.name || "", "zh-Hant");
+            valueB = 0;
+            break;
+          case "date":
+            valueA = a.date || "";
+            valueB = b.date || "";
+            break;
+          case "price":
+            valueA = Number(a.price || 0);
+            valueB = Number(b.price || 0);
+            break;
+          case "quantity":
+            valueA = Number(a.quantity || 0);
+            valueB = Number(b.quantity || 0);
+            break;
+          case "tradeAmount":
+            valueA = Number(a.tradeAmount || 0);
+            valueB = Number(b.tradeAmount || 0);
+            break;
+          case "updatedAt":
+            valueA = a.updatedAt || "";
+            valueB = b.updatedAt || "";
+            break;
+          default:
+            valueA = a.date || "";
+            valueB = b.date || "";
+        }
+
+        if (tableSort.key === "name") {
+          return valueA * direction;
+        }
+
+        if (typeof valueA === "number" && typeof valueB === "number") {
+          return (valueA - valueB) * direction;
+        }
+
+        if (valueA < valueB) return -1 * direction;
+        if (valueA > valueB) return 1 * direction;
+        return 0;
+      });
+    }
+
     function getFilteredRecords() {
       const name = $("filterName").value;
       const start = $("filterStart").value;
       const end = $("filterEnd").value;
 
-      return records
+      const filtered = records
         .filter(item => !name || item.name === name)
         .filter(item => !start || item.date >= start)
-        .filter(item => !end || item.date <= end)
-        .sort((a, b) => b.date.localeCompare(a.date));
+        .filter(item => !end || item.date <= end);
+
+      return sortRecords(filtered);
     }
 
     function renderSummary() {
@@ -1318,13 +1414,13 @@
           <table>
             <thead>
               <tr>
-                <th>類型</th>
-                <th>單筆名稱</th>
-                <th>委託／申購日期</th>
-                <th>成交價（元／股）</th>
-                <th>成交量（股數）</th>
-                <th>成交總額</th>
-                <th>更新時間</th>
+                <th class="sortable-th"><button class="sort-btn" type="button" onclick="toggleSort('type')">類型<span class="sort-indicator">${tableSort.key === "type" ? (tableSort.direction === "asc" ? "↑" : "↓") : "↕"}</span></button></th>
+                <th class="sortable-th"><button class="sort-btn" type="button" onclick="toggleSort('name')">單筆名稱<span class="sort-indicator">${tableSort.key === "name" ? (tableSort.direction === "asc" ? "↑" : "↓") : "↕"}</span></button></th>
+                <th class="sortable-th"><button class="sort-btn" type="button" onclick="toggleSort('date')">委託／申購日期<span class="sort-indicator">${tableSort.key === "date" ? (tableSort.direction === "asc" ? "↑" : "↓") : "↕"}</span></button></th>
+                <th class="sortable-th"><button class="sort-btn" type="button" onclick="toggleSort('price')">成交價（元／股）<span class="sort-indicator">${tableSort.key === "price" ? (tableSort.direction === "asc" ? "↑" : "↓") : "↕"}</span></button></th>
+                <th class="sortable-th"><button class="sort-btn" type="button" onclick="toggleSort('quantity')">成交量（股數）<span class="sort-indicator">${tableSort.key === "quantity" ? (tableSort.direction === "asc" ? "↑" : "↓") : "↕"}</span></button></th>
+                <th class="sortable-th"><button class="sort-btn" type="button" onclick="toggleSort('tradeAmount')">成交總額<span class="sort-indicator">${tableSort.key === "tradeAmount" ? (tableSort.direction === "asc" ? "↑" : "↓") : "↕"}</span></button></th>
+                <th class="sortable-th"><button class="sort-btn" type="button" onclick="toggleSort('updatedAt')">更新時間<span class="sort-indicator">${tableSort.key === "updatedAt" ? (tableSort.direction === "asc" ? "↑" : "↓") : "↕"}</span></button></th>
                 <th>操作</th>
               </tr>
             </thead>
