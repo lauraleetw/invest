@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>個人股票基金交易紀錄系統｜IBM Style v3</title>
+  <style>
+    :root {
+      --cds-background: #ffffff;
+      --cds-layer-01: #f4f4f4;
+      --cds-layer-02: #e0e0e0;
+      --cds-layer-03: #c6c6c6;
+      --cds-text-primary: #161616;
+      --cds-text-secondary: #525252;
+      --cds-text-placeholder: #8d8d8d;
+      --cds-border-subtle: #e0e0e0;
+      --cds-border-strong: #8d8d8d;
+      --cds-interactive: #0f62fe;
+      --cds-interactive-hover: #0353e9;
+      --cds-support-error: #da1e28;
+      --cds-support-success: #24a148;
+      --cds-support-warning: #f1c21b;
+      --cds-purple: #8a3ffc;
+      --cds-cyan: #007d79;
+      --shell-height: 48px;
+      --font: "IBM Plex Sans", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--cds-text-primary);
+      background: var(--cds-background);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: 0;
+      z-index: 999;
+      background: var(--cds-interactive);
+      color: #fff;
+      padding: 12px 16px;
+    }
+
+    .skip-link:focus {
+      left: 0;
+    }
+
+    .shell {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: var(--shell-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #161616;
+      color: #fff;
+      border-bottom: 1px solid #393939;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-right: 1px solid #393939;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-title {
+      padding: 0 16px;
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .shell-actions {
+      display: flex;
+      height: 100%;
+    }
+
+    .shell-btn,
+    .file-shell-btn {
+      height: 48px;
+      border: 0;
+      border-left: 1px solid #393939;
+      background: #161616;
+      color: #f4f4f4;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .shell-btn:hover,
+    .file-shell-btn:hover {
+      background: #353535;
+    }
+
+    .file-shell-btn input {
+      display: none;
+    }
+
+    .page {
+      display: grid;
+      grid-template-columns: 272px 1fr;
+      min-height: calc(100vh - var(--shell-height));
+    }
+
+    .side {
+      background: var(--cds-layer-01);
+      border-right: 1px solid var(--cds-border-subtle);
+      padding: 24px 16px;
+    }
+
+    .side-kicker {
+      font-size: 12px;
+      color: var(--cds-text-secondary);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .side h1 {
+      margin: 0 0 16px;
+      font-size: 32px;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      font-weight: 400;
+    }
+
+    .side p {
+      margin: 0 0 24px;
+      color: var(--cds-text-secondary);
+      line-height: 1.75;
+    }
+
+    .nav-card {
+      border-top: 1px solid var(--cds-border-subtle);
+      padding-top: 18px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--cds-text-primary);
+      text-decoration: none;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--cds-border-subtle);
+    }
+
+    .nav-item span:first-child {
+      font-weight: 600;
+    }
+
+    .nav-item span:last-child {
+      color: var(--cds-interactive);
+    }
+
+    main {
+      min-width: 0;
+      background: #fff;
+    }
+
+    .hero {
+      padding: 48px 32px 32px;
+      border-bottom: 1px solid var(--cds-border-subtle);
+      background:
+        linear-gradient(90deg, #ffffff 0%, #ffffff 56%, #f4f4f4 56%, #f4f4f4 100%);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr);
+      gap: 32px;
+      align-items: end;
+    }
+
+    .hero h2 {
+      margin: 0;
+      max-width: 820px;
+      font-size: clamp(36px, 5vw, 72px);
+      line-height: .98;
+      letter-spacing: -0.055em;
+      font-weight: 300;
+    }
+
+    .hero h2 strong {
+      font-weight: 600;
+    }
+
+    .hero-copy {
+      color: var(--cds-text-secondary);
+      font-size: 16px;
+      line-height: 1.8;
+      max-width: 640px;
+      margin: 18px 0 0;
+    }
+
+    .hero-panel {
+      background: #161616;
+      color: #fff;
+      min-height: 212px;
+      padding: 24px;
+      display: grid;
+      align-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-panel::after {
+      content: "";
+      position: absolute;
+      right: -32px;
+      bottom: -40px;
+      width: 170px;
+      height: 170px;
+      border: 1px solid #525252;
+      transform: rotate(45deg);
+    }
+
+    .hero-panel small {
+      color: #c6c6c6;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .hero-panel strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 24px;
+      line-height: 1.2;
+      font-weight: 400;
+      max-width: 340px;
+    }
+
+    .hero-panel .blue-line {
+      width: 96px;
+      height: 3px;
+      background: var(--cds-interactive);
+    }
+
+    .content {
+      padding: 32px;
+      display: grid;
+      gap: 32px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--cds-border-subtle);
+      border: 1px solid var(--cds-border-subtle);
+    }
+
+    .metric {
+      background: var(--cds-layer-01);
+      padding: 24px;
+      min-height: 156px;
+      display: grid;
+      align-content: space-between;
+      position: relative;
+    }
+
+    .metric::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--cds-interactive);
+    }
+
+    .metric:nth-child(2)::before {
+      background: var(--cds-cyan);
+    }
+
+    .metric:nth-child(3)::before {
+      background: var(--cds-purple);
+    }
+
+    .metric-label {
+      color: var(--cds-text-secondary);
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+
+    .metric-value {
+      font-size: clamp(28px, 3.5vw, 44px);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      font-weight: 400;
+    }
+
+    .metric-note {
+      color: var(--cds-text-secondary);
+      font-size: 13px;
+      margin-top: 16px;
+    }
+
+
+    .asset-settings {
+      border: 1px solid var(--cds-border-subtle);
+      background: #fff;
+    }
+
+    .asset-settings-body {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+      padding: 24px;
+      background: var(--cds-layer-01);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 408px minmax(0, 1fr);
+      gap: 32px;
+      align-items: start;
+    }
+
+    .section {
+      border: 1px solid var(--cds-border-subtle);
+      background: #fff;
+    }
+
+    .section-header {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 16px 0 24px;
+      border-bottom: 1px solid var(--cds-border-subtle);
+      background: #fff;
+    }
+
+    .section-header h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+    }
+
+    .status {
+      color: var(--cds-support-success);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--cds-border-subtle);
+      background: #fff;
+    }
+
+    .tab {
+      position: relative;
+      min-width: 50%;
+      height: 48px;
+      border: 0;
+      border-right: 1px solid var(--cds-border-subtle);
+      background: #fff;
+      color: var(--cds-text-secondary);
+      cursor: pointer;
+      text-align: left;
+      padding: 0 16px;
+      font-weight: 600;
+    }
+
+    .tab:hover {
+      background: var(--cds-layer-01);
+    }
+
+    .tab.active {
+      color: var(--cds-text-primary);
+    }
+
+    .tab.active::after {
+      content: "";
+      position: absolute;
+      height: 3px;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      background: var(--cds-interactive);
+    }
+
+    form {
+      padding: 24px;
+      display: grid;
+      gap: 20px;
+      background: #fff;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      color: var(--cds-text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 48px;
+      border: 0;
+      border-bottom: 1px solid var(--cds-border-strong);
+      border-radius: 0;
+      background: var(--cds-layer-01);
+      color: var(--cds-text-primary);
+      padding: 0 16px;
+      outline: 2px solid transparent;
+      outline-offset: -2px;
+      transition: outline .12s ease, background .12s ease;
+    }
+
+    input::placeholder {
+      color: var(--cds-text-placeholder);
+    }
+
+    input:focus,
+    select:focus {
+      outline-color: var(--cds-interactive);
+      border-bottom-color: transparent;
+    }
+
+    select {
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #525252 50%),
+        linear-gradient(135deg, #525252 50%, transparent 50%);
+      background-position:
+        calc(100% - 19px) 21px,
+        calc(100% - 14px) 21px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+      padding-right: 40px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .hint {
+      color: var(--cds-text-secondary);
+      font-size: 12px;
+      line-height: 1.6;
+      padding-left: 1px;
+    }
+
+    .form-actions,
+    .toolbar-actions {
+      display: flex;
+      gap: 1px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 48px;
+      border: 0;
+      border-radius: 0;
+      padding: 0 18px;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background .12s ease, outline .12s ease;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--cds-interactive);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      background: var(--cds-interactive);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--cds-interactive-hover);
+    }
+
+    .btn-secondary {
+      background: #393939;
+      color: #fff;
+    }
+
+    .btn-secondary:hover {
+      background: #4c4c4c;
+    }
+
+    .btn-ghost {
+      background: var(--cds-layer-01);
+      color: var(--cds-text-primary);
+    }
+
+    .btn-ghost:hover {
+      background: var(--cds-layer-02);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--cds-support-error);
+      border-left: 1px solid var(--cds-border-subtle);
+    }
+
+    .btn-danger:hover {
+      background: #fff1f1;
+    }
+
+    .btn-small {
+      min-height: 32px;
+      padding: 0 12px;
+      font-size: 13px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) 160px 160px auto;
+      gap: 16px;
+      align-items: end;
+      padding: 16px 24px;
+      background: var(--cds-layer-01);
+      border-bottom: 1px solid var(--cds-border-subtle);
+    }
+
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 16px 12px 24px;
+      border-bottom: 1px solid var(--cds-border-subtle);
+      background: #fff;
+    }
+
+    .table-toolbar-title {
+      color: var(--cds-text-secondary);
+      font-size: 13px;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow: auto;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1060px;
+    }
+
+    th {
+      height: 48px;
+      background: var(--cds-layer-02);
+      border-bottom: 1px solid var(--cds-border-subtle);
+      color: var(--cds-text-primary);
+      text-align: left;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    td {
+      height: 56px;
+      border-bottom: 1px solid var(--cds-border-subtle);
+      color: var(--cds-text-primary);
+      padding: 0 16px;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover td {
+      background: #f4f7fb;
+    }
+
+    .name-cell {
+      font-weight: 600;
+    }
+
+    .type-pill {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .type-stock {
+      background: #d0e2ff;
+      color: #002d9c;
+    }
+
+    .type-fund {
+      background: #9ef0f0;
+      color: #004144;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 1px;
+    }
+
+    .empty {
+      margin: 24px;
+      min-height: 160px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      background: var(--cds-layer-01);
+      border: 1px dashed var(--cds-border-strong);
+      color: var(--cds-text-secondary);
+      padding: 24px;
+    }
+
+    .system-note {
+      padding: 16px 24px 24px;
+      color: var(--cds-text-secondary);
+      font-size: 13px;
+      line-height: 1.7;
+      border-top: 1px solid var(--cds-border-subtle);
+      background: #fff;
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 60;
+      min-width: 240px;
+      background: #393939;
+      color: #fff;
+      border-left: 4px solid var(--cds-support-success);
+      padding: 14px 16px;
+      transform: translateY(16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all .18s ease;
+      font-weight: 600;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1180px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .side {
+        border-right: 0;
+        border-bottom: 1px solid var(--cds-border-subtle);
+      }
+
+      .workspace,
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 840px) {
+      .shell-actions {
+        display: none;
+      }
+
+      .content,
+      .hero {
+        padding: 24px 16px;
+      }
+
+      .metrics,
+      .workspace,
+      .filters,
+      .asset-settings-body {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions,
+      .toolbar-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .btn,
+      .shell-btn,
+      .file-shell-btn {
+        width: 100%;
+      }
+
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      .shell,
+      .side,
+      .input-section,
+      .asset-settings,
+      .filters,
+      .toolbar-actions,
+      .row-actions,
+      .system-note {
+        display: none !important;
+      }
+
+      .page,
+      .workspace {
+        display: block;
+      }
+
+      .hero,
+      .content {
+        padding: 16px;
+      }
+
+      table {
+        min-width: 0;
+        font-size: 11px;
+      }
+
+      th,
+      td {
+        padding: 0 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#records">跳到交易資料表</a>
+
+  <header class="shell">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">IL</div>
+      <div class="brand-title">Investment Ledger｜股票與基金交易紀錄</div>
+    </div>
+
+    <div class="shell-actions">
+      <button class="shell-btn" type="button" onclick="exportData()">匯出 JSON</button>
+      <label class="file-shell-btn">
+        匯入備份
+        <input type="file" accept="application/json" onchange="importData(event)" />
+      </label>
+      <button class="shell-btn" type="button" onclick="window.print()">列印</button>
+    </div>
+  </header>
+
+  <div class="page">
+    <aside class="side">
+      <div class="side-kicker">Portfolio record system</div>
+      <h1>個人資產交易紀錄</h1>
+      <p>
+        以 IBM Carbon 風格設計的單機版 HTML 介面。單筆交易只紀錄成交資訊；股票總資產與基金總資產改由您另外手動輸入。
+      </p>
+
+      <nav class="nav-card" aria-label="頁面導覽">
+        <a class="nav-item" href="#overview">
+          <span>成交總覽</span>
+          <span>→</span>
+        </a>
+        <a class="nav-item" href="#asset-settings">
+          <span>總資產輸入</span>
+          <span>→</span>
+        </a>
+        <a class="nav-item" href="#entry">
+          <span>新增／編輯</span>
+          <span>→</span>
+        </a>
+        <a class="nav-item" href="#records">
+          <span>交易查詢</span>
+          <span>→</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="hero" aria-label="系統介紹">
+        <div class="hero-grid">
+          <div>
+            <h2>Track <strong>transaction totals</strong> and <strong>portfolio assets</strong>.</h2>
+            <p class="hero-copy">
+              股票與基金單筆紀錄保留成交資料；全部股票成交總額、全部基金成交總額會自動加總。股票總資產與基金總資產則由您手動輸入，方便對照帳戶實際總值。
+            </p>
+          </div>
+          <div class="hero-panel">
+            <div>
+              <small>Current view</small>
+              <strong>成交總額自動統計，總資產手動管理</strong>
+            </div>
+            <div class="blue-line" aria-hidden="true"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="content">
+        <section class="metrics" id="overview" aria-label="成交與資產總覽">
+          <article class="metric">
+            <div>
+              <div class="metric-label">全部股票成交總額</div>
+              <div class="metric-value" id="stockTradeTotal">NT$0</div>
+            </div>
+            <div class="metric-note" id="stockCount">0 筆股票紀錄</div>
+          </article>
+
+          <article class="metric">
+            <div>
+              <div class="metric-label">全部基金成交總額</div>
+              <div class="metric-value" id="fundTradeTotal">NT$0</div>
+            </div>
+            <div class="metric-note" id="fundCount">0 筆基金紀錄</div>
+          </article>
+
+          <article class="metric">
+            <div>
+              <div class="metric-label">股票 + 基金總資產</div>
+              <div class="metric-value" id="grandAssetTotal">NT$0</div>
+            </div>
+            <div class="metric-note">依下方手動輸入的股票總資產與基金總資產加總</div>
+          </article>
+        </section>
+
+        <section class="asset-settings" id="asset-settings">
+          <div class="section-header">
+            <h3>總資產輸入</h3>
+            <span class="status" id="assetStatus"></span>
+          </div>
+          <div class="asset-settings-body">
+            <div class="field">
+              <label for="stockAssetInput">股票總資產</label>
+              <input id="stockAssetInput" type="number" inputmode="decimal" min="0" step="1" placeholder="請輸入股票帳戶目前總資產" />
+            </div>
+            <div class="field">
+              <label for="fundAssetInput">基金總資產</label>
+              <input id="fundAssetInput" type="number" inputmode="decimal" min="0" step="1" placeholder="請輸入基金帳戶目前總資產" />
+            </div>
+            <button class="btn btn-primary" type="button" onclick="saveAssetTotals()">儲存總資產</button>
+          </div>
+        </section>
+
+        <section class="workspace">
+          <section class="section input-section" id="entry">
+            <div class="section-header">
+              <h3 id="formTitle">新增股票紀錄</h3>
+              <span class="status" id="editStatus"></span>
+            </div>
+
+            <div class="tabs" role="tablist" aria-label="交易類型">
+              <button class="tab active" type="button" id="stockTab" onclick="switchType('stock')" aria-selected="true">股票</button>
+              <button class="tab" type="button" id="fundTab" onclick="switchType('fund')" aria-selected="false">基金</button>
+            </div>
+
+            <form id="recordForm" onsubmit="saveRecord(event)">
+              <input type="hidden" id="recordId" />
+              <input type="hidden" id="recordType" value="stock" />
+
+              <div class="field">
+                <label for="name">單筆名稱</label>
+                <input id="name" type="text" placeholder="例如：0050、台積電、安聯 AI 人工智慧基金" required />
+              </div>
+
+              <div class="field">
+                <label for="date" id="dateLabel">委託日期</label>
+                <input id="date" type="date" required />
+              </div>
+
+              <div id="stockFields">
+                <div class="two-col">
+                  <div class="field">
+                    <label for="price">成交價（元／股）</label>
+                    <input id="price" type="number" inputmode="decimal" min="0" step="0.01" placeholder="185.50" oninput="syncStockAmount()" />
+                  </div>
+                  <div class="field">
+                    <label for="quantity">成交量（股數）</label>
+                    <input id="quantity" type="number" inputmode="numeric" min="0" step="1" placeholder="1000" oninput="syncStockAmount()" />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="stockTradeAmount">成交總額</label>
+                  <input id="stockTradeAmount" type="number" inputmode="decimal" min="0" step="1" placeholder="會自動以成交價 × 股數帶入，也可手動修改" />
+                  <div class="hint">股票成交總額未包含手續費與交易稅，若需要可自行輸入調整後金額。</div>
+                </div>
+              </div>
+
+              <div id="fundFields" style="display: none;">
+                <div class="field">
+                  <label for="fundTradeAmount">成交總額</label>
+                  <input id="fundTradeAmount" type="number" inputmode="decimal" min="0" step="1" placeholder="請輸入基金申購成交總額" />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit" id="saveBtn">儲存紀錄</button>
+                <button class="btn btn-ghost" type="button" onclick="resetForm()">清除表單</button>
+              </div>
+            </form>
+
+            <div class="system-note">
+              單筆股票與基金資料已移除「目前資產總額」。若要管理目前總資產，請使用上方「股票總資產／基金總資產」欄位。
+            </div>
+          </section>
+
+          <section class="section" id="records">
+            <div class="section-header">
+              <h3>交易資料查詢</h3>
+              <div class="toolbar-actions">
+                <button class="btn btn-danger btn-small" type="button" onclick="clearAllData()">清空全部資料</button>
+              </div>
+            </div>
+
+            <div class="filters">
+              <div class="field">
+                <label for="filterName">名稱篩選</label>
+                <select id="filterName" onchange="render()">
+                  <option value="">全部名稱</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="filterStart">起始日期</label>
+                <input id="filterStart" type="date" onchange="render()" />
+              </div>
+              <div class="field">
+                <label for="filterEnd">結束日期</label>
+                <input id="filterEnd" type="date" onchange="render()" />
+              </div>
+              <button class="btn btn-ghost" type="button" onclick="resetFilters()">重設篩選</button>
+            </div>
+
+            <div class="table-toolbar">
+              <div class="table-toolbar-title" id="tableStatus">顯示 0 筆紀錄</div>
+              <div class="toolbar-actions shell-mobile-actions">
+                <button class="btn btn-secondary btn-small" type="button" onclick="exportData()">匯出 JSON</button>
+                <label class="btn btn-ghost btn-small" style="cursor:pointer;">
+                  匯入
+                  <input type="file" accept="application/json" onchange="importData(event)" style="display:none;" />
+                </label>
+              </div>
+            </div>
+
+            <div id="tableArea"></div>
+          </section>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">已儲存</div>
+
+  <script>
+    const STORAGE_KEY = "investmentLedger.v3.ibm";
+    const LEGACY_KEYS = ["investmentLedger.v2.ibm", "investmentLedger.v1"];
+    let records = [];
+    let assets = {
+      stockAssetTotal: 0,
+      fundAssetTotal: 0
+    };
+    let activeType = "stock";
+
+    const $ = (id) => document.getElementById(id);
+
+    const money = (value) => {
+      const n = Number(value || 0);
+      return new Intl.NumberFormat("zh-TW", {
+        style: "currency",
+        currency: "TWD",
+        maximumFractionDigits: 0
+      }).format(n);
+    };
+
+    const numberText = (value, digits = 2) => {
+      if (value === "" || value === null || value === undefined || Number.isNaN(Number(value))) return "-";
+      return new Intl.NumberFormat("zh-TW", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: digits
+      }).format(Number(value));
+    };
+
+    function load() {
+      try {
+        const current = localStorage.getItem(STORAGE_KEY);
+        if (current) {
+          const payload = JSON.parse(current);
+          records = normalizeRecords(payload.records || []);
+          assets = {
+            stockAssetTotal: Number(payload.assets?.stockAssetTotal || 0),
+            fundAssetTotal: Number(payload.assets?.fundAssetTotal || 0)
+          };
+        } else {
+          const legacyRaw = LEGACY_KEYS.map(key => localStorage.getItem(key)).find(Boolean);
+          if (legacyRaw) {
+            const legacyPayload = JSON.parse(legacyRaw);
+            const legacyRecords = Array.isArray(legacyPayload) ? legacyPayload : legacyPayload.records || [];
+            records = normalizeRecords(legacyRecords);
+            assets = {
+              stockAssetTotal: legacyRecords
+                .filter(item => item.type === "stock")
+                .reduce((sum, item) => sum + Number(item.currentValue || 0), 0),
+              fundAssetTotal: legacyRecords
+                .filter(item => item.type === "fund")
+                .reduce((sum, item) => sum + Number(item.currentValue || 0), 0)
+            };
+          }
+        }
+      } catch (error) {
+        records = [];
+        assets = { stockAssetTotal: 0, fundAssetTotal: 0 };
+      }
+
+      $("stockAssetInput").value = assets.stockAssetTotal || "";
+      $("fundAssetInput").value = assets.fundAssetTotal || "";
+      persist();
+      render();
+    }
+
+    function normalizeRecords(items) {
+      return items.map(item => ({
+        id: item.id || crypto.randomUUID(),
+        type: item.type === "fund" ? "fund" : "stock",
+        name: item.name || "",
+        date: item.date || "",
+        price: item.type === "stock" ? Number(item.price || 0) : undefined,
+        quantity: item.type === "stock" ? Number(item.quantity || 0) : undefined,
+        tradeAmount: Number(item.tradeAmount || 0),
+        updatedAt: item.updatedAt || new Date().toISOString()
+      })).filter(item => item.name && item.date);
+    }
+
+    function persist() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        version: 3,
+        ui: "ibm-style",
+        updatedAt: new Date().toISOString(),
+        assets,
+        records
+      }));
+    }
+
+    function showToast(message, type = "success") {
+      const toast = $("toast");
+      toast.textContent = message;
+      toast.style.borderLeftColor = type === "error" ? "var(--cds-support-error)" : "var(--cds-support-success)";
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function switchType(type) {
+      activeType = type;
+      $("recordType").value = type;
+
+      $("stockTab").classList.toggle("active", type === "stock");
+      $("fundTab").classList.toggle("active", type === "fund");
+      $("stockTab").setAttribute("aria-selected", type === "stock" ? "true" : "false");
+      $("fundTab").setAttribute("aria-selected", type === "fund" ? "true" : "false");
+
+      $("stockFields").style.display = type === "stock" ? "block" : "none";
+      $("fundFields").style.display = type === "fund" ? "block" : "none";
+      $("dateLabel").textContent = type === "stock" ? "委託日期" : "申購日期";
+
+      $("price").required = type === "stock";
+      $("quantity").required = type === "stock";
+      $("stockTradeAmount").required = type === "stock";
+      $("fundTradeAmount").required = type === "fund";
+
+      if (!$("recordId").value) {
+        $("formTitle").textContent = type === "stock" ? "新增股票紀錄" : "新增基金紀錄";
+      }
+    }
+
+    function syncStockAmount() {
+      const price = Number($("price").value || 0);
+      const quantity = Number($("quantity").value || 0);
+      if (price > 0 && quantity > 0) {
+        $("stockTradeAmount").value = Math.round(price * quantity);
+      }
+    }
+
+    function saveAssetTotals() {
+      const stockAssetTotal = Number($("stockAssetInput").value || 0);
+      const fundAssetTotal = Number($("fundAssetInput").value || 0);
+
+      if (stockAssetTotal < 0 || fundAssetTotal < 0) {
+        showToast("總資產不可小於 0", "error");
+        return;
+      }
+
+      assets = { stockAssetTotal, fundAssetTotal };
+      persist();
+      renderSummary();
+
+      $("assetStatus").textContent = "已儲存";
+      window.setTimeout(() => $("assetStatus").textContent = "", 1800);
+      showToast("已儲存總資產");
+    }
+
+    function saveRecord(event) {
+      event.preventDefault();
+
+      const type = $("recordType").value;
+      const id = $("recordId").value || crypto.randomUUID();
+      const name = $("name").value.trim();
+      const date = $("date").value;
+
+      if (!name || !date) {
+        showToast("請輸入名稱與日期", "error");
+        return;
+      }
+
+      const base = {
+        id,
+        type,
+        name,
+        date,
+        updatedAt: new Date().toISOString()
+      };
+
+      let record;
+
+      if (type === "stock") {
+        const price = Number($("price").value || 0);
+        const quantity = Number($("quantity").value || 0);
+        const tradeAmount = Number($("stockTradeAmount").value || 0);
+
+        if (price <= 0 || quantity <= 0 || tradeAmount <= 0) {
+          showToast("請輸入股票成交價、成交量與成交總額", "error");
+          return;
+        }
+
+        record = {
+          ...base,
+          price,
+          quantity,
+          tradeAmount
+        };
+      } else {
+        const tradeAmount = Number($("fundTradeAmount").value || 0);
+
+        if (tradeAmount <= 0) {
+          showToast("請輸入基金成交總額", "error");
+          return;
+        }
+
+        record = {
+          ...base,
+          tradeAmount
+        };
+      }
+
+      const index = records.findIndex(item => item.id === id);
+      if (index >= 0) {
+        records[index] = record;
+        showToast("已更新紀錄");
+      } else {
+        records.push(record);
+        showToast("已新增紀錄");
+      }
+
+      persist();
+      resetForm();
+      render();
+    }
+
+    function resetForm() {
+      $("recordForm").reset();
+      $("recordId").value = "";
+      $("recordType").value = activeType;
+      $("saveBtn").textContent = "儲存紀錄";
+      $("editStatus").textContent = "";
+      $("formTitle").textContent = activeType === "stock" ? "新增股票紀錄" : "新增基金紀錄";
+      switchType(activeType);
+    }
+
+    function editRecord(id) {
+      const record = records.find(item => item.id === id);
+      if (!record) return;
+
+      activeType = record.type;
+      switchType(record.type);
+
+      $("recordId").value = record.id;
+      $("recordType").value = record.type;
+      $("name").value = record.name;
+      $("date").value = record.date;
+
+      if (record.type === "stock") {
+        $("price").value = record.price || "";
+        $("quantity").value = record.quantity || "";
+        $("stockTradeAmount").value = record.tradeAmount || "";
+        $("fundTradeAmount").value = "";
+      } else {
+        $("fundTradeAmount").value = record.tradeAmount || "";
+        $("price").value = "";
+        $("quantity").value = "";
+        $("stockTradeAmount").value = "";
+      }
+
+      $("saveBtn").textContent = "更新紀錄";
+      $("editStatus").textContent = "編輯中";
+      $("formTitle").textContent = record.type === "stock" ? "編輯股票紀錄" : "編輯基金紀錄";
+      document.querySelector("#entry").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function deleteRecord(id) {
+      const record = records.find(item => item.id === id);
+      if (!record) return;
+
+      if (!confirm(`確定刪除「${record.name}」這筆紀錄？`)) return;
+
+      records = records.filter(item => item.id !== id);
+      persist();
+      render();
+      showToast("已刪除紀錄");
+    }
+
+    function resetFilters() {
+      $("filterName").value = "";
+      $("filterStart").value = "";
+      $("filterEnd").value = "";
+      render();
+    }
+
+    function getFilteredRecords() {
+      const name = $("filterName").value;
+      const start = $("filterStart").value;
+      const end = $("filterEnd").value;
+
+      return records
+        .filter(item => !name || item.name === name)
+        .filter(item => !start || item.date >= start)
+        .filter(item => !end || item.date <= end)
+        .sort((a, b) => b.date.localeCompare(a.date));
+    }
+
+    function renderSummary() {
+      const stockRecords = records.filter(item => item.type === "stock");
+      const fundRecords = records.filter(item => item.type === "fund");
+
+      const stockTradeTotal = stockRecords.reduce((sum, item) => sum + Number(item.tradeAmount || 0), 0);
+      const fundTradeTotal = fundRecords.reduce((sum, item) => sum + Number(item.tradeAmount || 0), 0);
+      const grandAssetTotal = Number(assets.stockAssetTotal || 0) + Number(assets.fundAssetTotal || 0);
+
+      $("stockTradeTotal").textContent = money(stockTradeTotal);
+      $("fundTradeTotal").textContent = money(fundTradeTotal);
+      $("grandAssetTotal").textContent = money(grandAssetTotal);
+      $("stockCount").textContent = `${stockRecords.length} 筆股票紀錄`;
+      $("fundCount").textContent = `${fundRecords.length} 筆基金紀錄`;
+    }
+
+    function renderNameOptions() {
+      const current = $("filterName").value;
+      const names = [...new Set(records.map(item => item.name).filter(Boolean))].sort((a, b) => a.localeCompare(b, "zh-Hant"));
+      $("filterName").innerHTML = `<option value="">全部名稱</option>` + names.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("");
+      if (names.includes(current)) $("filterName").value = current;
+    }
+
+    function renderTable() {
+      const data = getFilteredRecords();
+      const area = $("tableArea");
+      $("tableStatus").textContent = `顯示 ${data.length} 筆紀錄`;
+
+      if (!data.length) {
+        area.innerHTML = `<div class="empty">目前沒有符合條件的資料。請新增紀錄，或調整名稱與日期區間篩選。</div>`;
+        return;
+      }
+
+      area.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>類型</th>
+                <th>單筆名稱</th>
+                <th>委託／申購日期</th>
+                <th>成交價（元／股）</th>
+                <th>成交量（股數）</th>
+                <th>成交總額</th>
+                <th>更新時間</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(item => `
+                <tr>
+                  <td><span class="type-pill ${item.type === "stock" ? "type-stock" : "type-fund"}">${item.type === "stock" ? "股票" : "基金"}</span></td>
+                  <td class="name-cell">${escapeHtml(item.name)}</td>
+                  <td>${escapeHtml(item.date)}</td>
+                  <td>${item.type === "stock" ? numberText(item.price, 2) : "-"}</td>
+                  <td>${item.type === "stock" ? numberText(item.quantity, 0) : "-"}</td>
+                  <td><strong>${money(item.tradeAmount || 0)}</strong></td>
+                  <td>${formatDateTime(item.updatedAt)}</td>
+                  <td>
+                    <div class="row-actions">
+                      <button class="btn btn-ghost btn-small" type="button" onclick="editRecord('${item.id}')">編輯</button>
+                      <button class="btn btn-danger btn-small" type="button" onclick="deleteRecord('${item.id}')">刪除</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function render() {
+      renderSummary();
+      renderNameOptions();
+      renderTable();
+    }
+
+    function exportData() {
+      const payload = {
+        app: "investmentLedger",
+        ui: "ibm-style",
+        version: 3,
+        exportedAt: new Date().toISOString(),
+        assets,
+        records
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const today = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `investment-ledger-ibm-v3-${today}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("已匯出備份");
+    }
+
+    function importData(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const payload = JSON.parse(reader.result);
+          const imported = Array.isArray(payload) ? payload : payload.records;
+
+          if (!Array.isArray(imported)) {
+            throw new Error("Invalid file format");
+          }
+
+          if (!confirm("匯入會覆蓋目前資料，確定繼續？")) return;
+
+          records = normalizeRecords(imported);
+
+          if (payload.assets) {
+            assets = {
+              stockAssetTotal: Number(payload.assets.stockAssetTotal || 0),
+              fundAssetTotal: Number(payload.assets.fundAssetTotal || 0)
+            };
+          } else {
+            assets = {
+              stockAssetTotal: imported
+                .filter(item => item.type === "stock")
+                .reduce((sum, item) => sum + Number(item.currentValue || 0), 0),
+              fundAssetTotal: imported
+                .filter(item => item.type === "fund")
+                .reduce((sum, item) => sum + Number(item.currentValue || 0), 0)
+            };
+          }
+
+          $("stockAssetInput").value = assets.stockAssetTotal || "";
+          $("fundAssetInput").value = assets.fundAssetTotal || "";
+
+          persist();
+          render();
+          resetForm();
+          showToast("已匯入備份");
+        } catch (error) {
+          alert("匯入失敗：檔案格式不正確。");
+        } finally {
+          event.target.value = "";
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function clearAllData() {
+      if (!records.length && !assets.stockAssetTotal && !assets.fundAssetTotal) {
+        showToast("目前沒有資料");
+        return;
+      }
+
+      const text = prompt("這會刪除所有交易紀錄與總資產輸入。如確定清空，請輸入：清空");
+      if (text !== "清空") return;
+
+      records = [];
+      assets = { stockAssetTotal: 0, fundAssetTotal: 0 };
+      $("stockAssetInput").value = "";
+      $("fundAssetInput").value = "";
+
+      persist();
+      resetForm();
+      render();
+      showToast("已清空全部資料");
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDateTime(iso) {
+      if (!iso) return "-";
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return "-";
+      return new Intl.DateTimeFormat("zh-TW", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(d);
+    }
+
+    switchType("stock");
+    load();
+  </script>
+</body>
+</html>
